@@ -43,10 +43,11 @@ export default function Player({ items, playerPosRef, gameState }) {
     }
   }, [])
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!playerRef.current || !modelRef.current || gameState !== 'playing') return
 
     const speed = 0.2
+    const frameSpeed = speed * delta * 60
     let isMoving = false
     const direction = new THREE.Vector3()
 
@@ -56,7 +57,7 @@ export default function Player({ items, playerPosRef, gameState }) {
     if (keys.current.d) { direction.x += 1; isMoving = true }
 
     if (isMoving) {
-      direction.normalize().multiplyScalar(speed)
+      direction.normalize().multiplyScalar(frameSpeed)
       const nextX = pos.current.x + direction.x
       const nextZ = pos.current.z + direction.z
 
