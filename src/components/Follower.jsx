@@ -18,7 +18,7 @@ export default function Follower({ playerPosRef, initialPosition, items, gameSta
     if (modelRef.current) modelRef.current.traverse((obj) => { if (obj.isMesh) obj.frustumCulled = false })
   }, [])
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!chaserRef.current || !modelRef.current || gameState !== 'playing') return
 
     const playerPos = playerPosRef.current
@@ -41,6 +41,7 @@ export default function Follower({ playerPosRef, initialPosition, items, gameSta
       desiredDirection.normalize()
       let moveDir = desiredDirection.clone()
       let foundPath = false
+      const frameSpeed = CHASER_SPEED * delta * 60
 
       const anglesToTry = [
         0, Math.PI / 6, -Math.PI / 6, Math.PI / 3, -Math.PI / 3,
@@ -49,8 +50,8 @@ export default function Follower({ playerPosRef, initialPosition, items, gameSta
 
       for (let angle of anglesToTry) {
         const testDir = desiredDirection.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), angle)
-        const nextX = followerPos.x + testDir.x * CHASER_SPEED
-        const nextZ = followerPos.z + testDir.z * CHASER_SPEED
+        const nextX = followerPos.x + testDir.x * frameSpeed
+        const nextZ = followerPos.z + testDir.z * frameSpeed
 
         let isColliding = false
         for (let i = 0; i < items.length; i++) {
@@ -77,7 +78,7 @@ export default function Follower({ playerPosRef, initialPosition, items, gameSta
       }
 
       if (foundPath) {
-        followerPos.add(moveDir.multiplyScalar(CHASER_SPEED))
+        followerPos.add(moveDir.multiplyScalar(frameSpeed))
         const angleY = Math.atan2(moveDir.x, moveDir.z)
         chaserTargetQuaternion.current.setFromAxisAngle(new THREE.Vector3(0, 1, 0), angleY)
       }
@@ -96,4 +97,3 @@ export default function Follower({ playerPosRef, initialPosition, items, gameSta
     </group>
   )
 }
-
